@@ -8,6 +8,12 @@
   "permissions": [
     "core:default",
     "log:default",
-    "shell:default"
+    "shell:default",
+    "core:menu:default",
+    "core:menu:allow-set-as-app-menu",
+    "core:window:default",
+    "core:window:allow-maximize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-minimize"
   ]
 }
