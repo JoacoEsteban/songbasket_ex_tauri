@@ -17,6 +17,7 @@ defmodule SongbasketExTauriWeb.CoreComponents do
   use Phoenix.Component
 
   alias Phoenix.LiveView.JS
+  alias Heroicons, as: Icon
   import SongbasketExTauriWeb.Gettext
 
   @doc """
