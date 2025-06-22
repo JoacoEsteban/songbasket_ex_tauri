@@ -7,6 +7,8 @@ config :songbasket_ex_tauri, SongbasketExTauri.Repo,
   stacktrace: true,
   show_sensitive_data_on_connection_error: true
 
+config :songbasket_ex_tauri, SongbasketExTauri.Api, api_url: "http://localhost:5000"
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #

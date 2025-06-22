@@ -8,6 +8,8 @@ import Config
 config :songbasket_ex_tauri, SongbasketExTauriWeb.Endpoint,
   cache_static_manifest: "priv/static/cache_manifest.json"
 
+config :songbasket_ex_tauri, SongbasketExTauri.Api, api_url: "https://api.songbasket.com/"
+
 # Configures Swoosh API Client
 config :swoosh, api_client: Swoosh.ApiClient.Finch, finch_name: SongbasketExTauri.Finch
 
