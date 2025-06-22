@@ -1,2 +1,4 @@
 [tools]
 zig = "0.14.0"
+[env]
+MACOSX_DEPLOYMENT_TARGET = "10.13"

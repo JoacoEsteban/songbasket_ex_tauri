@@ -1,13 +1,33 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+use tauri_plugin_deep_link::DeepLinkExt;
 use tauri_plugin_shell::process::CommandEvent;
 use tauri_plugin_shell::ShellExt;
 
 fn main() {
-    tauri::Builder::default()
+    #[allow(unused_mut)]
+    let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_deep_link::init());
+
+    #[cfg(desktop)]
+    {
+        builder = builder.plugin(tauri_plugin_single_instance::init(|_app, argv, _cwd| {
+          println!("a new app instance was opened with {argv:?} and the deep link event was already triggered");
+          // when defining deep link schemes at runtime, you must also check `argv` here
+        }));
+    }
+
+    builder
         .plugin(tauri_plugin_log::Builder::new().build())
         .setup(|app| {
+            #[cfg(any(target_os = "linux", all(debug_assertions, windows)))]
+            app.deep_link().register_all()?;
+
+            app.deep_link().on_open_url(|event| {
+                dbg!(event.urls());
+            });
+
             start_server(app.handle());
             check_server_started();
             Ok(())

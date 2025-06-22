@@ -36,4 +36,14 @@
   "identifier": "you.app.songbasket",
   "productName": "Songbasket",
   "version": "0.1.0"
+  "version": "0.1.0",
+  "plugins": {
+    "features": {
+      "protocol": ["all"]
+    },
+    "deep-link": {
+      "schema": "songbasket",
+      "schemes": ["songbasket"]
+    }
+  }
 }
