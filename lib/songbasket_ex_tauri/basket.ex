@@ -6,9 +6,10 @@ defmodule SongbasketExTauri.Basket do
   use SongBasketExTauri.DynamicRepoManager, repo_pid_identifier: :basket_repo
   use SongbasketExTauri.RepoHelpers
 
+  require Logger
   alias Spotify.Playlist
-  alias SongbasketExTauri.Basket.{Playlists, Tracks, Users, Config}
   alias SongbasketExTauri.{Basket, Flow, Api, YoutubeCrawler}
+  alias SongbasketExTauri.Basket.{Playlists, Tracks, Users, Config, YoutubeVideo, TrackConversion}
 
   def is_initialized? do
     Basket.aggregate(Config, :count, :id)
@@ -130,7 +131,51 @@ defmodule SongbasketExTauri.Basket do
       playlist
       |> Map.get(:tracks)
 
-    results = get_playlist_tracks_to_youtube(tracks)
+    results =
+      get_playlist_tracks_to_youtube(tracks)
+      |> Enum.filter(fn %{track: track, results: results} ->
+        case length(results) do
+          1 ->
+            true
+
+          len ->
+            Logger.info(
+              [
+                "Track '#{track.name}' (id: #{track.id})",
+                if len == 0 do
+                  "has no results."
+                else
+                  "has more than 1 result."
+                end,
+                "Will omit"
+              ]
+              |> Enum.join(" ")
+            )
+
+            false
+        end
+      end)
+      |> Enum.map(fn %{track: track, results: [result]} ->
+        {track, result}
+      end)
+
+    Basket.transaction(fn ->
+      results
+      |> Enum.map(fn {_track, result} ->
+        result
+        |> YoutubeVideo.changeset()
+        |> Basket.upsert!()
+      end)
+
+      results
+      |> Enum.map(fn {track, result} ->
+        %TrackConversion{spotify_track_id: track.id, youtube_video_id: result.id}
+        |> Basket.upsert!(
+          on_conflict: :nothing,
+          conflict_target: [:spotify_track_id, :youtube_video_id]
+        )
+      end)
+    end)
   end
 
   def get_playlist_tracks_to_youtube(tracks) when is_list(tracks) do
