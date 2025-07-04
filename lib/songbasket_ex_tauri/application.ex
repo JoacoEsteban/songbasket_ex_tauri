@@ -11,16 +11,18 @@ defmodule SongbasketExTauri.Application do
       SongbasketExTauriWeb.Telemetry,
       SongbasketExTauri.Repo,
       {Ecto.Migrator,
-        repos: Application.fetch_env!(:songbasket_ex_tauri, :ecto_repos),
-        skip: skip_migrations?()},
-      {DNSCluster, query: Application.get_env(:songbasket_ex_tauri, :dns_cluster_query) || :ignore},
+       repos: Application.fetch_env!(:songbasket_ex_tauri, :ecto_repos), skip: skip_migrations?()},
+      {DNSCluster,
+       query: Application.get_env(:songbasket_ex_tauri, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: SongbasketExTauri.PubSub},
+      SongbasketExTauri.BasketManager,
       # Start the Finch HTTP client for sending emails
       {Finch, name: SongbasketExTauri.Finch},
       # Start a worker by calling: SongbasketExTauri.Worker.start_link(arg)
       # {SongbasketExTauri.Worker, arg},
       # Start to serve requests, typically the last entry
-      SongbasketExTauriWeb.Endpoint
+      SongbasketExTauriWeb.Endpoint,
+      SongbasketExTauri.MemoryStore
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

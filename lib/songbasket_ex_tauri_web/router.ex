@@ -10,20 +10,22 @@ defmodule SongbasketExTauriWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  pipeline :view do
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
 
   scope "/", SongbasketExTauriWeb do
-    pipe_through :browser
+    pipe_through [:browser, :view]
 
-    get "/", PageController, :home
+    live_session :app do
+      live "/", PageLive
+      live "/baskets/:id", BasketLive
+      live "/new_basket", NewBasketLive
+    end
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", SongbasketExTauriWeb do
-  #   pipe_through :api
-  # end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:songbasket_ex_tauri, :dev_routes) do

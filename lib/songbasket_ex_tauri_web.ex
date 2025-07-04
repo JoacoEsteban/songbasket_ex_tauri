@@ -110,4 +110,46 @@ defmodule SongbasketExTauriWeb do
   defmacro __using__(which) when is_atom(which) do
     apply(__MODULE__, which, [])
   end
+
+  # defmacro __using__([which | opts]) when is_atom(which) and is_list(opts) do
+  #   apply(__MODULE__, which, [Keyword.put(opts, :__CALLER__, __CALLER__)])
+  # end
+
+  # def surface_live_view do
+  #   quote do
+  #     use Surface.LiveView,
+  #       layout: {SongbasketExTauriWeb.Layouts, :app}
+
+  #     unquote(html_helpers())
+  #   end
+  # end
+
+  # def surface_live_component(opts) when is_list(opts) do
+  #   # id = Keyword.fetch!(opts, :id)
+  #   id = :crypto.strong_rand_bytes(10) |> Base.encode16(case: :lower)
+
+  #   hook =
+  #     to_string(opts[:__CALLER__].module)
+  #     |> String.replace_prefix("Elixir.", "")
+
+  #   if id == nil do
+  #     raise "Component ID is nil"
+  #   end
+
+  #   quote do
+  #     Module.put_attribute(__MODULE__, :id, unquote(id))
+  #     use Surface.LiveComponent
+  #     # use Phoenix.Component
+
+  #     def id, do: unquote(id)
+
+  #     def hook, do: unquote(hook) <> "#default"
+
+  #     def push_event_targeted(socket, event, payload) do
+  #       push_event(socket, "relay", %{id: unquote(id), e: event, p: payload})
+  #     end
+
+  #     unquote(html_helpers())
+  #   end
+  # end
 end

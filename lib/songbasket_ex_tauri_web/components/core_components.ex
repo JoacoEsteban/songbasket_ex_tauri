@@ -674,4 +674,14 @@ defmodule SongbasketExTauriWeb.CoreComponents do
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
   end
+
+  attr :click, :string, required: true
+
+  def button_self(assigns) do
+    ~H"""
+    <button class="btn btn-primary" phx-click={@click} phx-target={@myself}>
+      <%= render_slot(@inner_block) %>
+    </button>
+    """
+  end
 end
