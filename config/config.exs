@@ -65,3 +65,15 @@ config :phoenix, :json_library, Jason
 import_config "#{config_env()}.exs"
 
 config :ex_tauri, version: "^2.0.0", app_name: "Songbasket", host: "localhost", port: 4000
+
+config :songbasket_ex_tauri, basket_db_name: ".basket.db"
+
+config :crawly,
+  middlewares: [
+    Crawly.Middlewares.UniqueRequest,
+    {Crawly.Middlewares.UserAgent,
+     user_agents: [
+       # "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
+       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+     ]}
+  ]
