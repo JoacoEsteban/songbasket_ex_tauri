@@ -2,7 +2,8 @@
   "dependencies": {
     "@tailwindcss/typography": "^0.5.16",
     "@tauri-apps/api": "^2.5.0",
-    "@tauri-apps/plugin-deep-link": "^2.3.0"
+    "@tauri-apps/plugin-deep-link": "^2.3.0",
+    "@tauri-apps/plugin-dialog": "^2.2.2"
   },
   "devDependencies": {
     "daisyui": "^5.0.43"

@@ -1,3 +1,6 @@
+/* Import scoped CSS rules for components */
+@import "./_components.css";
+
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 @plugin "daisyui";
