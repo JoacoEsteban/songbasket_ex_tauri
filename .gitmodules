@@ -1,0 +1,3 @@
+[submodule "songbasket_phoenix"]
+	path = songbasket_phoenix
+	url = git@github.com:JoacoEsteban/songbasket_phoenix.git
