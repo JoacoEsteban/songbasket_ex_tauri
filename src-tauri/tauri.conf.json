@@ -21,9 +21,7 @@
   },
   "bundle": {
     "active": true,
-    "externalBin": [
-      "../burrito_out/desktop"
-    ],
+    "externalBin": ["../burrito_out/desktop"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -35,7 +33,6 @@
   },
   "identifier": "you.app.songbasket",
   "productName": "Songbasket",
-  "version": "0.1.0"
   "version": "0.1.0",
   "plugins": {
     "features": {

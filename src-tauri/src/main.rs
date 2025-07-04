@@ -7,6 +7,7 @@ use tauri_plugin_shell::ShellExt;
 fn main() {
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_deep_link::init());
 
