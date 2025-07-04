@@ -43,3 +43,11 @@ npm-debug.log
 burrito_out
 
 .DS_Store
+
+# Ignore generated js hook files for components
+assets/js/_hooks/
+
+# Ignore generated CSS file for components
+assets/css/_components.css
+
+scrapes
