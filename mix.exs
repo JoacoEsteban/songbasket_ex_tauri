@@ -40,7 +40,7 @@ defmodule SongbasketExTauri.MixProject do
       {:phoenix_html, "~> 4.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 0.20.2"},
-      {:floki, ">= 0.30.0", only: :test},
+      {:floki, ">= 0.30.0"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.3", runtime: Mix.env() == :dev},
@@ -53,7 +53,14 @@ defmodule SongbasketExTauri.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.2"},
-      {:ex_tauri, path: "../../contributing/ex_tauri"}
+      # {:ex_tauri, path: "../../contributing/ex_tauri"},
+      {:ex_tauri, github: "joacoesteban/ex_tauri"},
+      {:id3vx, github: "joacoesteban/id3vx"},
+      {:spotify_ex, "~> 2.3.0"},
+      {:clipboard, "~> 0.2.1"},
+      {:httpoison, "~> 2.2", override: true},
+      {:crawly, "~> 0.17.2"},
+      {:exyt_dlp, "~> 0.1.5"}
     ]
   end
 
