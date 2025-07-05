@@ -1,4 +1,4 @@
-defmodule SongbasketExTauri.Basket.PlaylistTracks do
+defmodule SongbasketExTauri.Basket.PlaylistTrack do
   use Ecto.Schema
   alias SongbasketExTauri.Basket.{Track, Playlist}
 

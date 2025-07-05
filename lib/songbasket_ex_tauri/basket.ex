@@ -99,7 +99,7 @@ defmodule SongbasketExTauri.Basket do
             %Basket.ArtistTrack{track_id: track.changes.id, artist_id: artist.changes.id}
           end)
 
-        playlist_track = %Basket.PlaylistTracks{
+        playlist_track = %Basket.PlaylistTrack{
           track_id: track.changes.id,
           playlist_id: playlist_id
         }
