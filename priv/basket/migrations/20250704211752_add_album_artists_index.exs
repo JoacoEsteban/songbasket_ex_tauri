@@ -1,4 +1,4 @@
-defmodule SongbasketExTauri.Basket.Migrations.AddAlbumArtistsIndex do
+defmodule Songbasket.Basket.Migrations.AddAlbumArtistsIndex do
   use Ecto.Migration
 
   def change do

@@ -5,7 +5,7 @@
 # Inside the script, you can read and write to any of your
 # repositories directly:
 #
-#     SongbasketExTauri.Repo.insert!(%SongbasketExTauri.SomeSchema{})
+#     Songbasket.Repo.insert!(%Songbasket.SomeSchema{})
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.

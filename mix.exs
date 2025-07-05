@@ -1,9 +1,9 @@
-defmodule SongbasketExTauri.MixProject do
+defmodule Songbasket.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :songbasket_ex_tauri,
+      app: :songbasket,
       version: "0.1.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -19,7 +19,7 @@ defmodule SongbasketExTauri.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {SongbasketExTauri.Application, []},
+      mod: {Songbasket.Application, []},
       extra_applications: [:logger, :runtime_tools, :inets]
     ]
   end
@@ -91,10 +91,10 @@ defmodule SongbasketExTauri.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind songbasket_ex_tauri", "esbuild songbasket_ex_tauri"],
+      "assets.build": ["tailwind songbasket", "esbuild songbasket"],
       "assets.deploy": [
-        "tailwind songbasket_ex_tauri --minify",
-        "esbuild songbasket_ex_tauri --minify",
+        "tailwind songbasket --minify",
+        "esbuild songbasket --minify",
         "phx.digest"
       ]
     ]

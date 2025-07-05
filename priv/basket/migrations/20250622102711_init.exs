@@ -1,4 +1,4 @@
-defmodule SongbasketExTauri.Basket.Migrations.Init do
+defmodule Songbasket.Basket.Migrations.Init do
   use Ecto.Migration
 
   def change do

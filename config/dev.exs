@@ -1,13 +1,13 @@
 import Config
 
 # Configure your database
-config :songbasket_ex_tauri, SongbasketExTauri.Repo,
-  database: Path.expand("../songbasket_ex_tauri_dev.db", __DIR__),
+config :songbasket, Songbasket.Repo,
+  database: Path.expand("../songbasket_dev.db", __DIR__),
   pool_size: 5,
   stacktrace: true,
   show_sensitive_data_on_connection_error: true
 
-config :songbasket_ex_tauri, SongbasketExTauri.Api, api_url: "http://127.0.0.1:5050"
+config :songbasket, Songbasket.Api, api_url: "http://127.0.0.1:5050"
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
@@ -15,7 +15,7 @@ config :songbasket_ex_tauri, SongbasketExTauri.Api, api_url: "http://127.0.0.1:5
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we can use it
 # to bundle .js and .css sources.
-config :songbasket_ex_tauri, SongbasketExTauriWeb.Endpoint,
+config :songbasket, SongbasketWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {127, 0, 0, 1}, port: 4000],
@@ -24,8 +24,8 @@ config :songbasket_ex_tauri, SongbasketExTauriWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "37Hdb/pPREqiZiyi7H98E0+7xOOvLfg+HCN+MFoQB+9Q+VCkNZLnI1NnRFMPN0oJ",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:songbasket_ex_tauri, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:songbasket_ex_tauri, ~w(--watch)]}
+    esbuild: {Esbuild, :install_and_run, [:songbasket, ~w(--sourcemap=inline --watch)]},
+    tailwind: {Tailwind, :install_and_run, [:songbasket, ~w(--watch)]}
   ]
 
 # ## SSL Support
@@ -52,17 +52,17 @@ config :songbasket_ex_tauri, SongbasketExTauriWeb.Endpoint,
 # different ports.
 
 # Watch static and templates for browser reloading.
-config :songbasket_ex_tauri, SongbasketExTauriWeb.Endpoint,
+config :songbasket, SongbasketWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/songbasket_ex_tauri_web/(controllers|live|components)/.*(ex|heex)$"
+      ~r"lib/songbasket_web/(controllers|live|components)/.*(ex|heex)$"
     ]
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :songbasket_ex_tauri, dev_routes: true
+config :songbasket, dev_routes: true
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"

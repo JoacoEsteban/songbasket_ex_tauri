@@ -5,10 +5,10 @@ if config_env() == :prod do
     System.get_env("DATABASE_PATH") ||
       raise """
       environment variable DATABASE_PATH is missing.
-      For example: /etc/songbasket_ex_tauri/songbasket_ex_tauri.db
+      For example: /etc/songbasket/songbasket.db
       """
 
-  config :songbasket_ex_tauri, SongbasketExTauri.Repo,
+  config :songbasket, Songbasket.Repo,
     database: database_path,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "5")
 end
@@ -18,7 +18,7 @@ end
 port = 4000
 IO.puts("[config.port]:#{port}")
 
-config :songbasket_ex_tauri, SongbasketExTauriWeb.Endpoint,
+config :songbasket, SongbasketWeb.Endpoint,
   url: [host: "localhost", port: port, scheme: "https"],
   http: [
     port: port

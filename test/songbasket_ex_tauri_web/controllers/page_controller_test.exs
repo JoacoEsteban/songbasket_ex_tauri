@@ -1,5 +1,5 @@
-defmodule SongbasketExTauriWeb.PageControllerTest do
-  use SongbasketExTauriWeb.ConnCase
+defmodule SongbasketWeb.PageControllerTest do
+  use SongbasketWeb.ConnCase
 
   test "GET /", %{conn: conn} do
     conn = get(conn, ~p"/")

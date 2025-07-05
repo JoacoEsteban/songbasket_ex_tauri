@@ -7,19 +7,19 @@
 # General application configuration
 import Config
 
-config :songbasket_ex_tauri,
-  ecto_repos: [SongbasketExTauri.Repo],
+config :songbasket,
+  ecto_repos: [Songbasket.Repo],
   generators: [timestamp_type: :utc_datetime]
 
 # Configures the endpoint
-config :songbasket_ex_tauri, SongbasketExTauriWeb.Endpoint,
+config :songbasket, SongbasketWeb.Endpoint,
   url: [host: "localhost"],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
-    formats: [html: SongbasketExTauriWeb.ErrorHTML, json: SongbasketExTauriWeb.ErrorJSON],
+    formats: [html: SongbasketWeb.ErrorHTML, json: SongbasketWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: SongbasketExTauri.PubSub,
+  pubsub_server: Songbasket.PubSub,
   live_view: [signing_salt: "jPHf6lLk"]
 
 # Configures the mailer
@@ -29,12 +29,12 @@ config :songbasket_ex_tauri, SongbasketExTauriWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :songbasket_ex_tauri, SongbasketExTauri.Mailer, adapter: Swoosh.Adapters.Local
+config :songbasket, Songbasket.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",
-  songbasket_ex_tauri: [
+  songbasket: [
     args:
       ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
     cd: Path.expand("../assets", __DIR__),
@@ -44,7 +44,7 @@ config :esbuild,
 # Configure tailwind (the version is required)
 config :tailwind,
   version: "4.0.0",
-  songbasket_ex_tauri: [
+  songbasket: [
     args: ~w(
       --input=assets/css/app.css
       --output=priv/static/assets/app.css
@@ -66,7 +66,7 @@ import_config "#{config_env()}.exs"
 
 config :ex_tauri, version: "^2.0.0", app_name: "Songbasket", host: "localhost", port: 4000
 
-config :songbasket_ex_tauri, basket_db_name: ".basket.db"
+config :songbasket, basket_db_name: ".basket.db"
 
 config :crawly,
   middlewares: [

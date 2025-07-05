@@ -1,4 +1,4 @@
-defmodule SongbasketExTauri.Basket.Migrations.CreateYoutubeVideos do
+defmodule Songbasket.Basket.Migrations.CreateYoutubeVideos do
   use Ecto.Migration
 
   def change do
