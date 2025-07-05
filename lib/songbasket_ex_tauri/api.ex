@@ -1,8 +1,7 @@
 defmodule SongbasketExTauri.Api do
   alias SongbasketExTauri.{Api}
   alias SongbasketExTauri.Basket.{Users}
-  alias Spotify.{Profile, Playlist, Paging, Playlist}
-  alias Spotify.Playlist.{Track}
+  alias Spotify.{Profile, Playlist, Paging}
 
   @base_url Application.compile_env!(:songbasket_ex_tauri, [SongbasketExTauri.Api, :api_url])
   @login_url Path.join(@base_url, "/spotify_login") |> URI.parse()
@@ -74,7 +73,7 @@ defmodule SongbasketExTauri.Api do
     retrieve_token: {:get, "/retrieve_token", RetrieveToken, :no_auth},
     me: {:get, "/api/me", Profile, :auth},
     playlists: {:get, "/api/playlists", &Playlist.build_response/1, :auth},
-    playlist_tracks: {:get, "/api/playlists/:id/tracks", &Track.build_response/1, :auth}
+    playlist_tracks: {:get, "/api/playlists/:id/tracks", &Playlist.Track.build_response/1, :auth}
   }
 
   for {name, {method, path, parser, auth}} <- @urls do

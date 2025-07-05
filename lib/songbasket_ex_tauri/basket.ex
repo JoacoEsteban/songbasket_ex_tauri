@@ -9,7 +9,7 @@ defmodule SongbasketExTauri.Basket do
   require Logger
   alias Spotify.Playlist
   alias SongbasketExTauri.{Basket, Flow, Api, YoutubeCrawler}
-  alias SongbasketExTauri.Basket.{Playlists, Tracks, Users, Config, YoutubeVideo, TrackConversion}
+  alias SongbasketExTauri.Basket.{Playlists, Track, Users, Config, YoutubeVideo, TrackConversion}
 
   def is_initialized? do
     Basket.aggregate(Config, :count, :id)
@@ -47,7 +47,7 @@ defmodule SongbasketExTauri.Basket do
     tracks =
       playlists_page.items
       |> Enum.map(fn track ->
-        Tracks.changeset(track)
+        Track.changeset(track)
       end)
 
     albums =
@@ -247,12 +247,12 @@ defmodule SongbasketExTauri.Basket do
   end
 
   def get_track_isrc(spotify_track_id) when is_binary(spotify_track_id) do
-    Tracks
+    Track
     |> Basket.get!(spotify_track_id)
     |> get_track_isrc()
   end
 
-  def get_track_isrc(%Tracks{} = track) do
+  def get_track_isrc(%Track{} = track) do
     track
     |> Map.get(:external_ids)
     |> Map.get("isrc")

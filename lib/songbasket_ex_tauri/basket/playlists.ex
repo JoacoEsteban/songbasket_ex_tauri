@@ -1,6 +1,6 @@
 defmodule SongbasketExTauri.Basket.Playlists do
   import SongbasketExTauri.Map
-  alias SongbasketExTauri.Basket.{Users, Tracks, PlaylistTracks}
+  alias SongbasketExTauri.Basket.{Users, Track, PlaylistTracks}
   alias Spotify.{Playlist}
 
   use Ecto.Schema
@@ -17,7 +17,7 @@ defmodule SongbasketExTauri.Basket.Playlists do
     field :collaborative, :boolean
     field :snapshot_id, :string
     field :last_update, :utc_datetime
-    # many_to_many :tracks, Tracks
+    # many_to_many :tracks, Track
     has_many :playlist_tracks, PlaylistTracks, foreign_key: :playlist_id
     has_many :tracks, through: [:playlist_tracks, :track]
   end
