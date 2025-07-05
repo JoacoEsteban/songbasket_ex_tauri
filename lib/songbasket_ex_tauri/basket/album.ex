@@ -2,7 +2,7 @@ defmodule SongbasketExTauri.Basket.Album do
   import SongbasketExTauri.Basket
   import SongbasketExTauri.Map
   alias SongbasketExTauri.{Basket}
-  alias SongbasketExTauri.Basket.{User, Album, Artist}
+  alias SongbasketExTauri.Basket.{User, Album, Artist, ArtistAlbum}
   alias Spotify.{Album}
 
   use Ecto.Schema
@@ -18,7 +18,8 @@ defmodule SongbasketExTauri.Basket.Album do
     field :total_tracks, :integer
     field :type, :string
     field :uri, :string
-    has_many :artists, Artist
+    has_many :artist_album, ArtistAlbum
+    has_many :artists, through: [:artist_album, :artist]
   end
 
   def all do
@@ -59,19 +60,9 @@ defmodule SongbasketExTauri.Basket.Album do
       |> struct_to_map()
       |> Map.put("external_url", external_url)
       |> Map.put("images", images)
-      |> Map.put(
-        "artists",
-        params["artists"]
-        |> Enum.map(&Artist.to_domain/1)
-      )
-
-    # |> Map.put("album", Album.to_domain(params["album"]))
-    # |> IO.inspect(label: :mapped_params)
   end
 
   def changeset(album, params) do
-    # IO.inspect(params, label: :params)
-
     required_fields = [
       :id,
       :album_type,
@@ -89,7 +80,6 @@ defmodule SongbasketExTauri.Basket.Album do
 
     album
     |> cast(params, fields)
-    |> cast_assoc(:artists)
     |> validate_required(required_fields)
     |> unique_constraint(:id)
     |> then(fn changeset ->
@@ -100,7 +90,7 @@ defmodule SongbasketExTauri.Basket.Album do
           on_conflict: [
             set:
               changeset.changes
-              |> Map.drop([:id, :artists])
+              |> Map.drop([:id])
               |> Map.to_list()
           ]
         }

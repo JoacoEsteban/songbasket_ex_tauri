@@ -1,6 +1,6 @@
 defmodule SongbasketExTauri.Basket.Artist do
   import SongbasketExTauri.Map
-  alias SongbasketExTauri.Basket.{User, Artist, Track, Album}
+  alias SongbasketExTauri.Basket.{User, Artist, Track, ArtistTrack, ArtistAlbum}
   alias Spotify.{Artist}
 
   use Ecto.Schema
@@ -13,8 +13,11 @@ defmodule SongbasketExTauri.Basket.Artist do
     field :name, :string
     field :uri, :string
 
-    has_many :tracks, Track
-    has_many :albums, Album
+    has_many :artist_tracks, ArtistTrack
+    has_many :tracks, through: [:artist_tracks, :track]
+
+    has_many :artist_albums, ArtistAlbum
+    has_many :albums, through: [:artist_albums, :album]
   end
 
   @upsert_opts %{

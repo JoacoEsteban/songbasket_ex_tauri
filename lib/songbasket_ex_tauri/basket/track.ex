@@ -26,52 +26,20 @@ defmodule SongbasketExTauri.Basket.Track do
   end
 
   def changeset(track, %Track{} = params) do
-    if params.track.id == "4bqTmTWcoiZXTw7LXVgyFS" do
-      dbg(params)
-      dbg(params |> to_string_map)
-    end
-
     params =
       params
       |> to_string_map()
       |> Map.get("track")
 
-    # external_url =
-    #   case params["external_urls"] do
-    #     %{"spotify" => url} -> url
-    #   end
-
-    # images =
-    #   case params["images"] do
-    #     nil ->
-    #       %{}
-
-    #     map ->
-    #       map
-    #       |> Enum.sort_by(& &1["height"])
-    #       |> Enum.at(0)
-    #   end
-
     params =
       params
       |> struct_to_map()
-      # |> Map.put("external_url", external_url)
-      # |> Map.put("images", images)
       |> Map.put("album", Album.to_domain(params["album"]))
-      |> Map.put(
-        "artists",
-        params["artists"]
-        |> Enum.map(&Artist.to_domain/1)
-      )
-
-    # |> IO.inspect(label: :mapped_params)
 
     changeset(track, params)
   end
 
   def changeset(track, params) do
-    # IO.inspect(params, label: :params)
-
     required_fields = [
       :id,
       :name,
@@ -87,7 +55,6 @@ defmodule SongbasketExTauri.Basket.Track do
     track
     |> cast(params, fields)
     |> cast_assoc(:album)
-    |> cast_assoc(:artists)
     |> validate_required(required_fields)
     |> unique_constraint(:id)
     |> then(fn changeset ->
@@ -98,7 +65,7 @@ defmodule SongbasketExTauri.Basket.Track do
           on_conflict: [
             set:
               changeset.changes
-              |> Map.drop([:id, :album, :artists])
+              |> Map.drop([:id, :album])
               |> Map.to_list()
           ]
         }
