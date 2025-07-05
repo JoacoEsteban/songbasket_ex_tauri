@@ -1,7 +1,7 @@
 defmodule SongbasketExTauri.Flow do
   import Ecto.Query, warn: false
   alias SongbasketExTauri.{Repo, PubSub, Events, Auth, Basket}
-  alias SongbasketExTauri.Basket.{Playlists}
+  alias SongbasketExTauri.Basket.{Playlist}
   alias SongbasketExTauri.Flow.{BasketRecord, Config}
 
   def add_basket(attrs) do
@@ -97,7 +97,7 @@ defmodule SongbasketExTauri.Flow do
 
   def download_playlist(playlist_id) do
     playlist =
-      Playlists
+      Playlist
       |> Basket.get!(playlist_id)
       |> Basket.preload(:tracks)
       |> Map.get(:tracks)

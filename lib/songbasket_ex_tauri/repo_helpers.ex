@@ -16,6 +16,14 @@ defmodule SongbasketExTauri.RepoHelpers do
           on_conflict: opts[:on_conflict]
         )
       end
+
+      def upsert_all(rows, opts) when is_list(rows) do
+        __MODULE__.insert_all(
+          rows,
+          conflict_target: opts[:conflict_target],
+          on_conflict: opts[:on_conflict]
+        )
+      end
     end
   end
 end

@@ -1,4 +1,4 @@
-defmodule SongbasketExTauri.Basket.Playlists do
+defmodule SongbasketExTauri.Basket.Playlist do
   import SongbasketExTauri.Map
   alias SongbasketExTauri.Basket.{Users, Track, PlaylistTracks}
   alias Spotify.{Playlist}

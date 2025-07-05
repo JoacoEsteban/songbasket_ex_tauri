@@ -3,13 +3,14 @@ defmodule SongbasketExTauri.Basket do
     otp_app: :songbasket_ex_tauri,
     adapter: Ecto.Adapters.SQLite3
 
+  import Ecto.Query
+
   use SongBasketExTauri.DynamicRepoManager, repo_pid_identifier: :basket_repo
   use SongbasketExTauri.RepoHelpers
 
   require Logger
-  alias Spotify.Playlist
   alias SongbasketExTauri.{Basket, Flow, Api, YoutubeCrawler}
-  alias SongbasketExTauri.Basket.{Playlists, Track, Users, Config, YoutubeVideo, TrackConversion}
+  alias SongbasketExTauri.Basket.{Playlist, Track, Users, Config, YoutubeVideo, TrackConversion}
 
   def is_initialized? do
     Basket.aggregate(Config, :count, :id)
@@ -137,7 +138,7 @@ defmodule SongbasketExTauri.Basket do
     playlists =
       playlists_page.items
       |> Enum.map(fn pl ->
-        Playlists.changeset(pl)
+        Playlist.changeset(pl)
       end)
 
     owners =
@@ -167,7 +168,7 @@ defmodule SongbasketExTauri.Basket do
 
   def convert_playlist(playlist_id) do
     playlist =
-      Playlists
+      Playlist
       |> Basket.get!(playlist_id)
       |> Basket.preload(:tracks)
 
@@ -262,7 +263,7 @@ defmodule SongbasketExTauri.Basket do
     # fetch all tables
     %{
       # config: ,
-      playlists: Playlists |> Basket.all()
+      playlists: Playlist |> Basket.all()
       # playlists: []
     }
   end
