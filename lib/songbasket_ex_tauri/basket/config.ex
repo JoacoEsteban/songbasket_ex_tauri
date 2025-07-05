@@ -1,13 +1,13 @@
 defmodule SongbasketExTauri.Basket.Config do
   import SongbasketExTauri.Basket
   alias SongbasketExTauri.{Basket}
-  alias SongbasketExTauri.Basket.{Users}
+  alias SongbasketExTauri.Basket.{User}
   use Ecto.Schema
   import Ecto.Changeset
 
   schema "config" do
     field :token, :string
-    belongs_to :user, Users, type: :string
+    belongs_to :user, User, type: :string
   end
 
   def changeset(attrs) do

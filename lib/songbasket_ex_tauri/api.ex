@@ -1,6 +1,5 @@
 defmodule SongbasketExTauri.Api do
   alias SongbasketExTauri.{Api}
-  alias SongbasketExTauri.Basket.{Users}
   alias Spotify.{Profile, Playlist, Paging}
 
   @base_url Application.compile_env!(:songbasket_ex_tauri, [SongbasketExTauri.Api, :api_url])

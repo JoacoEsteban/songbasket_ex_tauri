@@ -1,6 +1,6 @@
 defmodule SongbasketExTauri.Basket.Artist do
   import SongbasketExTauri.Map
-  alias SongbasketExTauri.Basket.{Users, Artist, Track, Album}
+  alias SongbasketExTauri.Basket.{User, Artist, Track, Album}
   alias Spotify.{Artist}
 
   use Ecto.Schema

@@ -37,7 +37,7 @@ defmodule SongbasketExTauri.Basket do
       |> IO.inspect(label: "User")
 
     Basket.transaction(fn ->
-      inserted_user = Basket.insert!(Users.changeset(user)) |> IO.inspect(label: "Inserted User")
+      inserted_user = Basket.insert!(User.changeset(user)) |> IO.inspect(label: "Inserted User")
       Basket.insert!(Config.changeset(%{token: token, user_id: inserted_user.id}))
     end)
   end

@@ -1,6 +1,6 @@
 defmodule SongbasketExTauri.Basket.Playlist do
   import SongbasketExTauri.Map
-  alias SongbasketExTauri.Basket.{Users, Track, PlaylistTracks}
+  alias SongbasketExTauri.Basket.{User, Track, PlaylistTracks}
   alias Spotify.{Playlist}
 
   use Ecto.Schema
@@ -9,7 +9,7 @@ defmodule SongbasketExTauri.Basket.Playlist do
   @primary_key {:id, :string, autogenerate: false}
   schema "playlists" do
     field :name, :string
-    belongs_to :owner, Users, type: :string, foreign_key: :owner_id, on_replace: :update
+    belongs_to :owner, User, type: :string, foreign_key: :owner_id, on_replace: :update
     field :description, :string
     field :external_url, :string
     field :images, :map
@@ -50,7 +50,7 @@ defmodule SongbasketExTauri.Basket.Playlist do
       |> struct_to_map()
       |> Map.put("external_url", external_url)
       |> Map.put("images", images)
-      |> Map.put("owner", Users.to_domain(params["owner"]))
+      |> Map.put("owner", User.to_domain(params["owner"]))
       |> IO.inspect(label: :mapped_params)
 
     changeset(playlist, params)
