@@ -1,8 +1,8 @@
-defmodule SongbasketExTauri.Basket.Albums do
+defmodule SongbasketExTauri.Basket.Album do
   import SongbasketExTauri.Basket
   import SongbasketExTauri.Map
   alias SongbasketExTauri.{Basket}
-  alias SongbasketExTauri.Basket.{Users, Albums, Artist}
+  alias SongbasketExTauri.Basket.{Users, Album, Artist}
   alias Spotify.{Album}
 
   use Ecto.Schema
@@ -65,7 +65,7 @@ defmodule SongbasketExTauri.Basket.Albums do
         |> Enum.map(&Artist.to_domain/1)
       )
 
-    # |> Map.put("album", Albums.to_domain(params["album"]))
+    # |> Map.put("album", Album.to_domain(params["album"]))
     # |> IO.inspect(label: :mapped_params)
   end
 

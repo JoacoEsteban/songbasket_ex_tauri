@@ -1,6 +1,6 @@
 defmodule SongbasketExTauri.Basket.Track do
   import SongbasketExTauri.Map
-  alias SongbasketExTauri.Basket.{Users, Albums, Artist, PlaylistTracks, ArtistTrack}
+  alias SongbasketExTauri.Basket.{Users, Album, Artist, PlaylistTracks, ArtistTrack}
   alias Spotify.Playlist.{Track}
 
   use Ecto.Schema
@@ -10,7 +10,7 @@ defmodule SongbasketExTauri.Basket.Track do
   schema "tracks" do
     field :name, :string
     field :uri, :string
-    belongs_to :album, Albums, type: :string, foreign_key: :album_id, on_replace: :update
+    belongs_to :album, Album, type: :string, foreign_key: :album_id, on_replace: :update
     field :duration_ms, :integer
     field :explicit, :boolean
     field :external_ids, :map
@@ -57,7 +57,7 @@ defmodule SongbasketExTauri.Basket.Track do
       |> struct_to_map()
       # |> Map.put("external_url", external_url)
       # |> Map.put("images", images)
-      |> Map.put("album", Albums.to_domain(params["album"]))
+      |> Map.put("album", Album.to_domain(params["album"]))
       |> Map.put(
         "artists",
         params["artists"]
