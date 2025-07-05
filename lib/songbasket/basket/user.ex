@@ -47,7 +47,7 @@ defmodule Songbasket.Basket.User do
 
         map ->
           map
-          |> Enum.sort_by(& &1["height"])
+          |> Enum.sort_by(& &1["height"], :desc)
           |> Enum.at(0)
       end
 
