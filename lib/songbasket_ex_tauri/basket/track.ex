@@ -1,6 +1,6 @@
 defmodule SongbasketExTauri.Basket.Track do
   import SongbasketExTauri.Map
-  alias SongbasketExTauri.Basket.{Users, Albums, Artist, PlaylistTracks}
+  alias SongbasketExTauri.Basket.{Users, Albums, Artist, PlaylistTracks, ArtistTrack}
   alias Spotify.Playlist.{Track}
 
   use Ecto.Schema
@@ -15,7 +15,8 @@ defmodule SongbasketExTauri.Basket.Track do
     field :explicit, :boolean
     field :external_ids, :map
     field :preview_url, :string
-    has_many :artists, Artist
+    has_many :artist_tracks, ArtistTrack
+    has_many :artists, through: [:artist_tracks, :artist]
     has_many :playlist_tracks, PlaylistTracks
     has_many :playlists, through: [:playlist_tracks, :playlist]
   end
