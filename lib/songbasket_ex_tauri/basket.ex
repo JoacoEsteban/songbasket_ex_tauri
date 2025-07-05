@@ -9,8 +9,18 @@ defmodule SongbasketExTauri.Basket do
   use SongbasketExTauri.RepoHelpers
 
   require Logger
+
+  alias SongbasketExTauri.Basket.{
+    Playlist,
+    Track,
+    Artist,
+    User,
+    Config,
+    YoutubeVideo,
+    TrackConversion
+  }
+
   alias SongbasketExTauri.{Basket, Flow, Api, YoutubeCrawler}
-  alias SongbasketExTauri.Basket.{Playlist, Track, Users, Config, YoutubeVideo, TrackConversion}
 
   def is_initialized? do
     Basket.aggregate(Config, :count, :id)
@@ -47,58 +57,50 @@ defmodule SongbasketExTauri.Basket do
 
     tracks =
       playlists_page.items
-      |> Enum.map(fn track ->
-        Track.changeset(track)
-      end)
+      |> Enum.map(&Track.put_entities/1)
 
-    albums =
-      tracks
+    track_rows =
+      playlists_page.items
+      |> Enum.map(&Track.changeset/1)
+
+    album_rows =
+      track_rows
       |> Enum.map(& &1.changes.album)
       |> Enum.uniq_by(& &1.changes.id)
 
-    artists =
-      Enum.concat(
-        tracks,
-        albums
-      )
-      |> Enum.flat_map(& &1.changes.artists)
-      |> Enum.uniq_by(& &1.changes.id)
+    artist_rows =
+      tracks
+      |> Enum.flat_map(fn track ->
+        Enum.concat(
+          track.artists,
+          track.album.artists
+        )
+      end)
+      |> Enum.uniq_by(& &1.id)
+      |> Enum.map(&Artist.changeset/1)
 
-    Basket.transaction(fn ->
-      Enum.each(artists, &Basket.upsert!/1)
-
-      Enum.each(albums, fn album ->
-        artists_album =
-          album.changes.artists
+    relations =
+      [
+        {Basket.ArtistTrack, :track_id, tracks},
+        {Basket.ArtistAlbum, :album_id,
+         tracks |> Enum.uniq_by(& &1.album.id) |> Enum.map(& &1.album)}
+      ]
+      |> Enum.flat_map(fn {str, key, items} ->
+        items
+        |> Enum.flat_map(fn item ->
+          item
+          |> Map.get(:artists)
           |> Enum.map(fn artist ->
-            %Basket.ArtistAlbum{album_id: album.changes.id, artist_id: artist.changes.id}
+            struct(str, [{key, item.id}, {:artist_id, artist.id}])
           end)
-
-        album =
-          album
-          |> Map.put(
-            :changes,
-            album.changes
-            |> Map.delete(:artists)
-          )
-
-        Basket.upsert!(album)
-
-        Enum.each(artists_album, fn album ->
-          Basket.upsert!(album,
-            on_conflict: :nothing,
-            conflict_target: [:artist_id, :album_id]
-          )
         end)
+        |> Enum.map(&{&1, [:artist_id, key]})
       end)
 
-      Enum.each(tracks, fn track ->
-        artists_track =
-          track.changes.artists
-          |> Enum.map(fn artist ->
-            %Basket.ArtistTrack{track_id: track.changes.id, artist_id: artist.changes.id}
-          end)
+    Basket.transaction(fn ->
+      Enum.each(artist_rows ++ album_rows, &Basket.upsert!/1)
 
+      Enum.each(track_rows, fn track ->
         playlist_track = %Basket.PlaylistTrack{
           track_id: track.changes.id,
           playlist_id: playlist_id
@@ -111,22 +113,22 @@ defmodule SongbasketExTauri.Basket do
             track.changes
             |> Map.put(:album_id, track.changes.album.changes.id)
             |> Map.delete(:album)
-            |> Map.delete(:artists)
           )
 
         Basket.upsert!(track)
-
-        Enum.each(artists_track, fn track ->
-          Basket.upsert!(track,
-            on_conflict: :nothing,
-            conflict_target: [:artist_id, :track_id]
-          )
-        end)
 
         playlist_track
         |> Basket.upsert!(
           on_conflict: :nothing,
           conflict_target: [:playlist_id, :track_id]
+        )
+      end)
+
+      Enum.each(relations, fn {relation, target} ->
+        relation
+        |> Basket.upsert!(
+          on_conflict: :nothing,
+          conflict_target: target
         )
       end)
     end)

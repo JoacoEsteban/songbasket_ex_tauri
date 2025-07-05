@@ -84,4 +84,13 @@ defmodule SongbasketExTauri.Basket.Artist do
       })
     end)
   end
+
+  def put_entity_spotify_artists(item) do
+    item
+    |> Map.put(
+      :artists,
+      item.artists
+      |> Enum.map(&Spotify.Helpers.to_struct(Spotify.Artist, &1))
+    )
+  end
 end

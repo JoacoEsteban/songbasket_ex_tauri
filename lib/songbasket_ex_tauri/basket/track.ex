@@ -72,4 +72,21 @@ defmodule SongbasketExTauri.Basket.Track do
       })
     end)
   end
+
+  def put_entities(%Spotify.Playlist.Track{} = playlist_track) do
+    put_entities(playlist_track.track)
+  end
+
+  def put_entities(%Spotify.Track{} = track) do
+    track
+    |> Artist.put_entity_spotify_artists()
+    |> then(fn track ->
+      track
+      |> Map.put(
+        :album,
+        Spotify.Helpers.to_struct(Spotify.Album, track.album)
+        |> Artist.put_entity_spotify_artists()
+      )
+    end)
+  end
 end
