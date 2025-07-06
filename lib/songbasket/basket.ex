@@ -177,11 +177,16 @@ defmodule Songbasket.Basket do
     end)
   end
 
-  def convert_playlist(playlist_id) do
-    playlist =
+  def convert_playlist(playlist_id) when is_binary(playlist_id) do
+    convert_playlist(
       Playlist
       |> Basket.get!(playlist_id)
-      |> Basket.preload(:tracks)
+    )
+  end
+
+  def convert_playlist(%Playlist{} = playlist) do
+    playlist
+    |> Basket.preload(:tracks)
 
     tracks =
       playlist
