@@ -1,6 +1,6 @@
 defmodule Songbasket.Basket.Track do
   import Songbasket.Map
-  alias Songbasket.Basket.{User, Album, Artist, PlaylistTrack, ArtistTrack}
+  alias Songbasket.Basket.{User, Album, Artist, PlaylistTrack, ArtistTrack, TrackConversion}
   alias Spotify.Playlist.{Track}
 
   use Ecto.Schema
@@ -19,6 +19,7 @@ defmodule Songbasket.Basket.Track do
     has_many :artists, through: [:artist_tracks, :artist]
     has_many :playlist_tracks, PlaylistTrack
     has_many :playlists, through: [:playlist_tracks, :playlist]
+    has_one :conversion, TrackConversion, foreign_key: :spotify_track_id
   end
 
   def changeset(params) do
