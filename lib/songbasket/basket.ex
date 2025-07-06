@@ -52,7 +52,8 @@ defmodule Songbasket.Basket do
     end)
   end
 
-  def update_playlist_tracks(playlist_id) do
+  def update_playlist_tracks(%Playlist{} = playlist) do
+    playlist_id = playlist.id
     {:ok, playlists_page, _} = Api.playlist_tracks(id: playlist_id, token: Config.get_token())
 
     tracks =
@@ -130,6 +131,14 @@ defmodule Songbasket.Basket do
           on_conflict: :nothing,
           conflict_target: target
         )
+
+        playlist
+        |> Ecto.Changeset.change(%{
+          last_update:
+            DateTime.utc_now()
+            |> DateTime.truncate(:second)
+        })
+        |> Basket.update()
       end)
     end)
   end
