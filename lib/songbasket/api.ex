@@ -117,11 +117,9 @@ defmodule Songbasket.Api do
 
       if status >= 200 && status < 400 do
         response.body
-        |> IO.inspect(label: "Raw body from request " <> unquote(path))
 
         {:ok, data} =
           Jason.decode(response.body)
-          |> IO.inspect(label: "Decoded JSON from request " <> unquote(path))
 
         body =
           case unquote(parser) do
