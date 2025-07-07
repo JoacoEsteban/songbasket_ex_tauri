@@ -2,6 +2,7 @@ defmodule SongBasketExTauri.DynamicRepoManager do
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
       @repo_pid_identifier opts[:repo_pid_identifier]
+      @repo_path_identifier Atom.to_string(opts[:repo_pid_identifier]) <> "_path"
       @migrations_path Application.app_dir(:songbasket, "priv/basket/migrations")
 
       def migrations_path do
@@ -17,26 +18,31 @@ defmodule SongBasketExTauri.DynamicRepoManager do
       def switch_db(db_path, opts) when is_binary(db_path) do
         db_path = Path.expand(db_path)
 
-        # Stop existing repo if running
-        if pid = Process.get(@repo_pid_identifier) do
-          Supervisor.stop(pid)
+        if Process.get(@repo_path_identifier) == db_path do
+          :noop
+        else
+          # Stop existing repo if running
+          if pid = Process.get(@repo_pid_identifier) do
+            Supervisor.stop(pid)
+          end
+
+          IO.inspect(db_path, label: "Starting new repo instance")
+          # Start new repo instance
+          {:ok, pid} = start_link(database: db_path, pool_size: 1)
+
+          IO.inspect(pid, label: "New repo started")
+
+          # Set as active for current process
+          __MODULE__.put_dynamic_repo(pid)
+          Process.put(@repo_pid_identifier, pid)
+          Process.put(@repo_path_identifier, db_path)
+
+          if opts[:migrate] do
+            migrate_repo()
+          end
+
+          :ok
         end
-
-        IO.inspect(db_path, label: "Starting new repo instance")
-        # Start new repo instance
-        {:ok, pid} = start_link(database: db_path, pool_size: 1)
-
-        IO.inspect(pid, label: "New repo started")
-
-        # Set as active for current process
-        __MODULE__.put_dynamic_repo(pid)
-        Process.put(@repo_pid_identifier, pid)
-
-        if opts[:migrate] do
-          migrate_repo()
-        end
-
-        :ok
       end
 
       def migrate_repo() do
@@ -58,6 +64,7 @@ defmodule SongBasketExTauri.DynamicRepoManager do
         if pid = Process.get(@repo_pid_identifier) do
           Supervisor.stop(pid)
           Process.delete(@repo_pid_identifier)
+          Process.delete(@repo_path_identifier)
           put_dynamic_repo(nil)
         end
 
