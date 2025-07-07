@@ -20,7 +20,17 @@ defmodule Songbasket.Basket do
     TrackConversion
   }
 
-  alias Songbasket.{Basket, Flow, Api, YoutubeCrawler, Downloader}
+  alias Songbasket.Flow.{
+    BasketRecord
+  }
+
+  alias Songbasket.{
+    Basket,
+    Api,
+    YoutubeCrawler,
+    Downloader,
+    Tags
+  }
 
   def is_initialized? do
     Basket.aggregate(Config, :count, :id)
@@ -276,7 +286,65 @@ defmodule Songbasket.Basket do
     |> Map.get("isrc")
   end
 
-  def download_track(track_id, folder_path) do
+  def download_playlist(playlist = %Playlist{}, basket = %BasketRecord{}) do
+    playlist_path =
+      Path.expand(basket.path)
+      |> Path.join('playlists')
+      |> Path.join(playlist.name)
+
+    :ok = File.mkdir_p(playlist_path)
+
+    existing_tracks =
+      Tags.retrieve_mp3_file_tags(:dir, playlist_path)
+      |> Enum.map(fn {file, tags} ->
+        tags.frames
+        |> Enum.filter(fn frame -> frame.id == "TXXX" end)
+        |> Enum.map(fn frame -> frame.data end)
+        |> Enum.map(fn %{description: k, value: v} -> Map.put(%{}, k, v) end)
+        |> Enum.reduce(%{}, &Map.merge/2)
+      end)
+      |> Enum.reduce(%{}, fn
+        %{
+          "songbasket_spotify_id" => id,
+          "songbasket_youtube_id" => video
+        },
+        acum ->
+          Map.put(acum, id, video)
+      end)
+
+    playlist
+    |> Basket.preload(tracks: [:album, :artists, conversion: [:youtube_video]])
+    |> Map.get(:tracks)
+    |> Enum.filter(fn track ->
+      track.conversion != nil
+    end)
+    |> Enum.filter(fn track ->
+      conversion_id = track.conversion.youtube_video.id
+
+      case existing_tracks |> Map.get(track.id) do
+        nil ->
+          true
+
+        video_id ->
+          conversion_id != video_id
+      end
+    end)
+    |> Enum.each(fn track ->
+      download_track(track, playlist_path)
+    end)
+  end
+
+  def download_track(%Track{} = track, folder_path) do
+    dbg("!")
+
+    %{conversion: %{youtube_video: video}} =
+      track
+      |> Basket.preload(conversion: [:youtube_video])
+
+    Downloader.download_youtube_video({video, track, folder_path})
+  end
+
+  def download_track(track_id, folder_path) when is_binary(track_id) do
     %{spotify_track: track, youtube_video: video} =
       Basket.one(from c in TrackConversion, where: c.spotify_track_id == ^track_id)
       |> Basket.preload(spotify_track: [:album, :artists])
