@@ -1,7 +1,10 @@
 defmodule Songbasket.YoutubeCrawler do
   @moduledoc false
+  require Logger
   @initial_data_prefix_replace "var ytInitialData = "
   @initial_data_prefix @initial_data_prefix_replace <> "{"
+  @scraper_cache_dir :code.priv_dir(:songbasket) |> Path.join("cache/scraper")
+  File.mkdir_p!(@scraper_cache_dir)
 
   import Songbasket.Utils
 
@@ -9,7 +12,7 @@ defmodule Songbasket.YoutubeCrawler do
     url = "https://www.youtube.com/results?search_query=#{URI.encode(query)}"
 
     cache_file =
-      "scrapes"
+      @scraper_cache_dir
       |> Path.join(URI.encode(query) <> ".html")
       |> Path.expand()
 
@@ -19,21 +22,14 @@ defmodule Songbasket.YoutubeCrawler do
           val
 
         _ ->
-          case Crawly.fetch(url, retries: 3) do
-            %{body: body, status_code: 200} ->
-              File.write(cache_file, body)
-              {:ok, body}
-
-            val ->
-              dbg(val)
-              {:err, val}
-          end
+          fetch(url)
       end
 
     case res do
       {:ok, body} ->
+        File.write(cache_file, body)
         {:ok, document} = Floki.parse_document(body)
-        # YouTube search results: video links have hrefs starting with "/watch"
+
         case yt_initial_data(document) do
           nil ->
             dbg(document)
@@ -46,6 +42,36 @@ defmodule Songbasket.YoutubeCrawler do
 
       {:err, _} = val ->
         val
+    end
+  end
+
+  def fetch(url, max_tries \\ 10, tries \\ 0) do
+    if tries >= max_tries do
+      Logger.error("Max retries exceeded for URL: #{url}")
+      {:error, :max_retries_exceeded}
+    else
+      sleep = tries ** 2 * 500
+
+      Logger.info("Fetching URL: #{url} on try #{tries + 1} of #{max_tries}")
+
+      unless tries == 0, do: Logger.info("Will wait for #{sleep} milliseconds")
+
+      Process.sleep(sleep)
+
+      case Crawly.fetch(url) do
+        %{body: body, status_code: 200} ->
+          unless tries == 0,
+            do: Logger.info("Successfully fetched URL: #{url} after #{tries + 1} tries")
+
+          {:ok, body}
+
+        %{status_code: 302} ->
+          fetch(url, max_tries, tries + 1)
+
+        val ->
+          dbg(val)
+          {:err, val}
+      end
     end
   end
 

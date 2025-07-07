@@ -249,7 +249,8 @@ defmodule Songbasket.Basket do
           isrc: track |> get_track_isrc()
         }
       end,
-      max_concurrency: 10
+      max_concurrency: 10,
+      timeout: :infinity
     )
     |> Enum.to_list()
     |> Enum.map(fn {:ok, result} -> result end)
