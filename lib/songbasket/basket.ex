@@ -64,83 +64,25 @@ defmodule Songbasket.Basket do
 
   def update_playlist_tracks(%Playlist{} = playlist) do
     playlist_id = playlist.id
-    {:ok, playlists_page, _} = Api.playlist_tracks(id: playlist_id, token: Config.get_token())
 
-    tracks =
-      playlists_page.items
-      |> Enum.map(&Track.put_entities/1)
-
-    track_rows =
-      playlists_page.items
-      |> Enum.map(&Track.changeset/1)
-
-    album_rows =
-      track_rows
-      |> Enum.map(& &1.changes.album)
-      |> Enum.uniq_by(& &1.changes.id)
-
-    artist_rows =
-      tracks
-      |> Enum.flat_map(fn track ->
-        Enum.concat(
-          track.artists,
-          track.album.artists
+    response =
+      if playlist.last_update == nil do
+        Api.playlist_first_update(
+          id: playlist_id,
+          token: Config.get_token()
         )
-      end)
-      |> Enum.uniq_by(& &1.id)
-      |> Enum.map(&Artist.changeset/1)
-
-    relations =
-      [
-        {Basket.ArtistTrack, :track_id, tracks},
-        {Basket.ArtistAlbum, :album_id,
-         tracks |> Enum.uniq_by(& &1.album.id) |> Enum.map(& &1.album)}
-      ]
-      |> Enum.flat_map(fn {str, key, items} ->
-        items
-        |> Enum.flat_map(fn item ->
-          item
-          |> Map.get(:artists)
-          |> Enum.map(fn artist ->
-            struct(str, [{key, item.id}, {:artist_id, artist.id}])
-          end)
-        end)
-        |> Enum.map(&{&1, [:artist_id, key]})
-      end)
-
-    Basket.transaction(fn ->
-      Enum.each(artist_rows ++ album_rows, &Basket.upsert!/1)
-
-      Enum.each(track_rows, fn track ->
-        playlist_track = %Basket.PlaylistTrack{
-          track_id: track.changes.id,
-          playlist_id: playlist_id
-        }
-
-        track =
-          track
-          |> Map.put(
-            :changes,
-            track.changes
-            |> Map.put(:album_id, track.changes.album.changes.id)
-            |> Map.delete(:album)
-          )
-
-        Basket.upsert!(track)
-
-        playlist_track
-        |> Basket.upsert!(
-          on_conflict: :nothing,
-          conflict_target: [:playlist_id, :track_id]
+      else
+        Api.playlist_update(
+          id: playlist_id,
+          snapshot_id: playlist.snapshot_id,
+          token: Config.get_token()
         )
-      end)
+      end
 
-      Enum.each(relations, fn {relation, target} ->
-        relation
-        |> Basket.upsert!(
-          on_conflict: :nothing,
-          conflict_target: target
-        )
+    # {:ok, playlists_page, _} = Api.playlist_tracks(id: playlist_id, token: Config.get_token())
+    case response do
+      {:ok, :not_modified, _} ->
+        Logger.info("Playlist #{playlist.name} not modified")
 
         playlist
         |> Ecto.Changeset.change(%{
@@ -149,8 +91,101 @@ defmodule Songbasket.Basket do
             |> DateTime.truncate(:second)
         })
         |> Basket.update()
-      end)
-    end)
+
+      {:ok, %{playlist: updated_playlist, tracks: playlists_page}, _} ->
+        tracks =
+          playlists_page.items
+          |> Enum.map(&Track.put_entities/1)
+
+        track_rows =
+          playlists_page.items
+          |> Enum.map(&Track.changeset/1)
+
+        album_rows =
+          track_rows
+          |> Enum.map(& &1.changes.album)
+          |> Enum.uniq_by(& &1.changes.id)
+
+        artist_rows =
+          tracks
+          |> Enum.flat_map(fn track ->
+            Enum.concat(
+              track.artists,
+              track.album.artists
+            )
+          end)
+          |> Enum.uniq_by(& &1.id)
+          |> Enum.map(&Artist.changeset/1)
+
+        relations =
+          [
+            {Basket.ArtistTrack, :track_id, tracks},
+            {Basket.ArtistAlbum, :album_id,
+             tracks |> Enum.uniq_by(& &1.album.id) |> Enum.map(& &1.album)}
+          ]
+          |> Enum.flat_map(fn {str, key, items} ->
+            items
+            |> Enum.flat_map(fn item ->
+              item
+              |> Map.get(:artists)
+              |> Enum.map(fn artist ->
+                struct(str, [{key, item.id}, {:artist_id, artist.id}])
+              end)
+            end)
+            |> Enum.map(&{&1, [:artist_id, key]})
+          end)
+
+        Basket.transaction(fn ->
+          Enum.each(artist_rows ++ album_rows, &Basket.upsert!/1)
+
+          Enum.each(track_rows, fn track ->
+            playlist_track = %Basket.PlaylistTrack{
+              track_id: track.changes.id,
+              playlist_id: playlist_id
+            }
+
+            track =
+              track
+              |> Map.put(
+                :changes,
+                track.changes
+                |> Map.put(:album_id, track.changes.album.changes.id)
+                |> Map.delete(:album)
+              )
+
+            Basket.upsert!(track)
+
+            playlist_track
+            |> Basket.upsert!(
+              on_conflict: :nothing,
+              conflict_target: [:playlist_id, :track_id]
+            )
+          end)
+
+          Enum.each(relations, fn {relation, target} ->
+            relation
+            |> Basket.upsert!(
+              on_conflict: :nothing,
+              conflict_target: target
+            )
+
+            updated_playlist =
+              updated_playlist
+              |> Map.put(
+                :last_update,
+                DateTime.utc_now() |> DateTime.truncate(:second)
+              )
+
+            updated_playlist
+            |> dbg
+
+            playlist
+            |> Basket.preload(:owner)
+            |> Playlist.changeset(updated_playlist)
+            |> Basket.update()
+          end)
+        end)
+    end
   end
 
   def update_playlists do

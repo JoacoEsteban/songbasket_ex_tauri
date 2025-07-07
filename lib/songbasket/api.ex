@@ -36,6 +36,15 @@ defmodule Songbasket.Api do
     use Page, Playlist
   end
 
+  defmodule Parsers do
+    def playlist_update(%{"playlist" => playlist, "tracks" => tracks}) do
+      playlist = Playlist.build_response(playlist)
+      tracks = Playlist.Track.build_response(tracks)
+
+      %{playlist: playlist, tracks: tracks}
+    end
+  end
+
   defmodule Router do
     def build_route(path) do
       {params, parts} = Plug.Router.Utils.build_path_match(path)
@@ -72,7 +81,10 @@ defmodule Songbasket.Api do
     retrieve_token: {:get, "/retrieve_token", RetrieveToken, :no_auth},
     me: {:get, "/api/me", Profile, :auth},
     playlists: {:get, "/api/playlists", &Playlist.build_response/1, :auth},
-    playlist_tracks: {:get, "/api/playlists/:id/tracks", &Playlist.Track.build_response/1, :auth}
+    playlist_tracks: {:get, "/api/playlists/:id/tracks", &Playlist.Track.build_response/1, :auth},
+    playlist_first_update: {:get, "/api/playlists/:id/update", &Parsers.playlist_update/1, :auth},
+    playlist_update:
+      {:get, "/api/playlists/:id/:snapshot_id/update", &Parsers.playlist_update/1, :auth}
   }
 
   for {name, {method, path, parser, auth}} <- @urls do
@@ -115,22 +127,25 @@ defmodule Songbasket.Api do
         Finch.build(unquote(method), final_path, headers, body, opts)
         |> Finch.request(Songbasket.Finch)
 
-      if status >= 200 && status < 400 do
-        response.body
+      case status do
+        304 ->
+          {:ok, :not_modified, response}
 
-        {:ok, data} =
-          Jason.decode(response.body)
+        status when status >= 200 and status < 400 ->
+          {:ok, data} =
+            Jason.decode(response.body)
 
-        body =
-          case unquote(parser) do
-            fun when is_function(fun) -> fun.(data)
-            mod -> struct(mod, Map.new(data, fn {k, v} -> {String.to_atom(k), v} end))
-          end
+          body =
+            case unquote(parser) do
+              fun when is_function(fun) -> fun.(data)
+              mod -> struct(mod, Map.new(data, fn {k, v} -> {String.to_atom(k), v} end))
+            end
 
-        {:ok, body, response}
-      else
-        dbg(response)
-        {:error, response.body, response}
+          {:ok, body, response}
+
+        _ ->
+          dbg(response)
+          {:error, response.body, response}
       end
     end
   end
