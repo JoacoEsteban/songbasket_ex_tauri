@@ -231,11 +231,12 @@ defmodule Songbasket.Basket do
 
   def convert_playlist(%Playlist{} = playlist) do
     playlist
-    |> Basket.preload(:tracks)
+    |> Basket.preload(tracks: [:conversion])
 
     tracks =
       playlist
       |> Map.get(:tracks)
+      |> Enum.filter(fn track -> track.conversion == nil end)
 
     results =
       get_playlist_tracks_to_youtube(tracks)
