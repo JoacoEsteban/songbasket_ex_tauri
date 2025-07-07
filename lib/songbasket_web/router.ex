@@ -22,8 +22,9 @@ defmodule SongbasketWeb.Router do
 
     live_session :app do
       live "/", PageLive
-      live "/baskets/:id", BasketLive
       live "/new_basket", NewBasketLive
+      live "/baskets/:id", BasketLive
+      live "/baskets/:id/playlists/:playlist_id", BasketPlaylistLive
     end
   end
 

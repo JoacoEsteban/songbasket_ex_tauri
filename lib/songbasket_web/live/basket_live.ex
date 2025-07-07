@@ -1,5 +1,6 @@
 defmodule SongbasketWeb.BasketLive do
   use SongbasketWeb, :live_view
+  alias SongbasketWeb.Utils
   alias Songbasket.{Api, PubSub, Flow, Events}
 
   @data [
@@ -27,12 +28,11 @@ defmodule SongbasketWeb.BasketLive do
       <%= if @basket do %>
         <div class="grid grid-cols-2 gap-4 mt-4">
           <%= for playlist <- @basket.playlists do %>
-            <!--
-            <.link navigate={~p"/playlist/#{playlist.id}"} class="btn btn-primary">
-              <%= playlist.name %>
-            </.link>
-            -->
-            <button class="btn btn-primary" phx-click="open_playlist" phx-value-id={playlist.id}>
+            <button
+              class={["btn btn-primary", playlist.last_update != nil && "border-green-500 border-4"]}
+              phx-click="open_playlist"
+              phx-value-id={playlist.id}
+            >
               <%= playlist.name %>
             </button>
           <% end %>
@@ -76,9 +76,8 @@ defmodule SongbasketWeb.BasketLive do
     {:noreply, push_navigate(socket, to: ~p"/")}
   end
 
-  def handle_event("open_playlist", %{"id" => id}, socket) do
-    Clipboard.copy(id)
-    {:noreply, socket}
+  def handle_event("open_playlist", %{"id" => playlist_id}, socket) do
+    {:noreply, Utils.navigate_basket(socket, "playlists/#{playlist_id}")}
   end
 
   def handle_event(params, uri, socket) do
