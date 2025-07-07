@@ -94,13 +94,4 @@ defmodule Songbasket.Flow do
 
     Events.emit({:auth_success, response})
   end
-
-  def download_playlist(playlist_id) do
-    playlist =
-      Playlist
-      |> Basket.get!(playlist_id)
-      |> Basket.preload(:tracks)
-      |> Map.get(:tracks)
-      |> dbg
-  end
 end
