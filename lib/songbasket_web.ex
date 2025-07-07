@@ -85,6 +85,7 @@ defmodule SongbasketWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import SongbasketWeb.CoreComponents
+      alias SongbasketWeb.Components.{Img}
       import SongbasketWeb.Gettext
 
       # Shortcut for generating JS commands
