@@ -12,11 +12,14 @@ defmodule SongbasketWeb.BasketLive do
     ~H"""
     <div class="container prose" phx-hook="App" id="app">
       <.link navigate={~p"/"} class="btn btn-primary">
-        <Heroicons.folder mini class="size-4" /> Go back
+        <Heroicons.arrow_left mini class="size-4" /> Go back
       </.link>
 
       <button class="btn btn-primary" phx-click="delete_selected_basket">
         <Heroicons.trash mini class="size-4" /> Delete Basket
+      </button>
+      <button class="btn btn-primary" phx-click="open_basket">
+        <Heroicons.folder mini class="size-4" /> Open
       </button>
       Basket
       <%= if @basket_record do %>
@@ -74,6 +77,11 @@ defmodule SongbasketWeb.BasketLive do
   def handle_event("delete_selected_basket", _, socket) do
     {:ok, _} = Flow.delete_basket(socket.assigns.basket_record.id)
     {:noreply, push_navigate(socket, to: ~p"/")}
+  end
+
+  def handle_event("open_basket", _, socket) do
+    Songbasket.OS.open_url(socket.assigns.basket_record.path)
+    {:noreply, socket}
   end
 
   def handle_event("open_playlist", %{"id" => playlist_id}, socket) do
