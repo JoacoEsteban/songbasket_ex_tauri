@@ -23,7 +23,7 @@ defmodule Songbasket.Downloader do
      %{
        paused: false,
        downloads: %{},
-       queue: []
+       queue: {[], MapSet.new()}
      }}
   end
 
@@ -48,11 +48,11 @@ defmodule Songbasket.Downloader do
     {:noreply, handle_queue(:dequeue, state)}
   end
 
-  def handle_queue(:dequeue, %{queue: []} = state) do
+  def handle_queue(:dequeue, %{queue: {[], _}} = state) do
     state
   end
 
-  def handle_queue(:dequeue, %{downloads: downloads, queue: [item | rest]} = state)
+  def handle_queue(:dequeue, %{downloads: downloads, queue: {[item | rest], keys}} = state)
       when map_size(downloads) < @max_concurrency do
     {video, track, _} = item
     key = [track.id, video.id] |> Enum.join(":")
@@ -71,7 +71,7 @@ defmodule Songbasket.Downloader do
 
     state
     |> Map.put(:downloads, downloads)
-    |> Map.put(:queue, rest)
+    |> Map.put(:queue, {rest, MapSet.delete(keys, key)})
   end
 
   def handle_queue(:dequeue, %{downloads: downloads} = state)
@@ -81,9 +81,23 @@ defmodule Songbasket.Downloader do
     state
   end
 
-  def handle_queue({:enqueue, item}, %{queue: queue} = state) do
-    send(self(), :dequeue)
-    %{state | queue: queue ++ [item]}
+  def handle_queue({:enqueue, item}, %{downloads: downloads, queue: {queue, keys}} = state) do
+    {video, track, _} = item
+    key = [track.id, video.id] |> Enum.join(":")
+
+    all_keys =
+      MapSet.union(
+        keys,
+        Map.keys(downloads) |> MapSet.new()
+      )
+
+    if MapSet.member?(all_keys, key) do
+      Logger.warning("Tried to enque an already enqueued track (#{track.id})")
+      state
+    else
+      send(self(), :dequeue)
+      %{state | queue: {queue ++ [item], MapSet.put(keys, key)}}
+    end
   end
 
   def handle_call(:get_current_downloads, _from, state) do
