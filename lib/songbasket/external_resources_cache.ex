@@ -35,6 +35,21 @@ defmodule Songbasket.ExternalResourcesCache do
     end
   end
 
+  def get(url, :binary) do
+    {data_uri, _, _} = get(url)
+
+    {mime, b64} =
+      data_uri
+      |> String.split(";base64,", parts: 2)
+      |> case do
+        [<<"data:", mime::binary>>, b64] -> {mime, b64}
+      end
+
+    {:ok, binary} = Base.decode64(b64)
+
+    {:ok, {mime, binary}}
+  end
+
   defp get_cached(id) do
     File.read(path(id))
   end
