@@ -29,7 +29,8 @@ defmodule Songbasket.Basket do
     Api,
     YoutubeCrawler,
     Downloader,
-    Tags
+    Tags,
+    Events
   }
 
   def is_initialized? do
@@ -325,7 +326,7 @@ defmodule Songbasket.Basket do
   def download_playlist(playlist = %Playlist{}, basket = %BasketRecord{}) do
     playlist_path =
       Path.expand(basket.path)
-      |> Path.join('playlists')
+      |> Path.join("playlists")
       |> Path.join(playlist.name)
 
     :ok = File.mkdir_p(playlist_path)
@@ -371,13 +372,13 @@ defmodule Songbasket.Basket do
   end
 
   def download_track(%Track{} = track, folder_path) do
-    dbg("!")
-
     %{conversion: %{youtube_video: video}} =
       track
       |> Basket.preload(conversion: [:youtube_video])
 
     Downloader.download_youtube_video({video, track, folder_path})
+
+    Logger.info("Download started for track #{track.id}")
   end
 
   def download_track(track_id, folder_path) when is_binary(track_id) do

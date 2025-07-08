@@ -20,8 +20,10 @@ defmodule Songbasket.Application do
       # Start a worker by calling: Songbasket.Worker.start_link(arg)
       # {Songbasket.Worker, arg},
       # Start to serve requests, typically the last entry
+      {Task.Supervisor, name: Songbasket.TaskSupervisor},
       SongbasketWeb.Endpoint,
-      Songbasket.MemoryStore
+      Songbasket.MemoryStore,
+      Songbasket.Downloader
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

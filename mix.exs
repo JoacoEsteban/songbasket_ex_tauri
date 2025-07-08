@@ -59,8 +59,7 @@ defmodule Songbasket.MixProject do
       {:spotify_ex, "~> 2.3.0"},
       {:clipboard, "~> 0.2.1"},
       {:httpoison, "~> 2.2", override: true},
-      {:crawly, "~> 0.17.2"},
-      {:exyt_dlp, "~> 0.1.5"}
+      {:crawly, "~> 0.17.2"}
     ]
   end
 
